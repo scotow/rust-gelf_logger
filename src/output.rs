@@ -56,18 +56,21 @@ impl GelfTcpOutput {
     }
 
     fn write_stream(&mut self, bytes: &[u8]) -> Result<()> {
-        if self.stream.is_none() {
-            self.stream = Some(match self.use_tls {
-                false => Box::new(self.tcp_connect()?),
-                true => {
+        let stream = match &mut self.stream {
+            Some(stream) => stream,
+            None => {
+                let stream: Box<dyn Write> = if self.use_tls {
                     let connector = TlsConnector::new().unwrap();
                     let stream = self.tcp_connect()?;
                     Box::new(connector.connect(&self.hostname, stream)?)
-                }
-            })
-        }
-        if let Err(e) = self.stream.as_mut().unwrap().write(bytes) {
-            // an error occured on the stream, reconnect it next time
+                } else {
+                    Box::new(self.tcp_connect()?)
+                };
+                self.stream.insert(stream)
+            }
+        };
+        if let Err(e) = stream.write_all(bytes) {
+            // an error occurred on the stream, reconnect it next time
             self.stream = None;
             Err(e)?;
         }

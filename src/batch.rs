@@ -13,8 +13,8 @@ use crate::config::Config;
 use crate::logger::GelfLogger;
 use crate::output::GelfTcpOutput;
 use crate::result::Result;
-use buffer::Event;
-use config::FullBufferPolicy;
+use crate::buffer::Event;
+use crate::config::FullBufferPolicy;
 
 static mut BATCH_PROCESSOR: &'static dyn Batch = &NoProcessor;
 
@@ -53,7 +53,8 @@ where
 /// }
 /// ```
 ///
-pub fn init_from_file(path: &str) -> Result<()> {
+#[cfg(feature = "yaml")]
+pub fn init_from_yaml_file(path: &str) -> Result<()> {
     init(Config::try_from_yaml(path)?)
 }
 

@@ -2,12 +2,14 @@
 // license that can be found in the LICENSE file.
 // Copyright 2009 The gelf_logger Authors. All rights reserved.
 
-use std::collections::BTreeMap;
+#[cfg(feature = "yaml")]
 use std::fs::File;
+use serde::Deserialize;
 
 use serde_gelf::GelfLevel;
-use serde_value::Value;
+use serde_json::{Map, Value};
 
+#[cfg(feature = "yaml")]
 use crate::result::Result;
 
 /// Builder for [`Config`](struct.Config.html).
@@ -34,7 +36,7 @@ pub struct ConfigBuilder {
     async_buffer_size: Option<usize>,
     buffer_size: Option<usize>,
     buffer_duration: Option<u64>,
-    additional_fields: BTreeMap<Value, Value>,
+    additional_fields: Map<String, Value>,
     full_buffer_policy: Option<FullBufferPolicy>,
     connect_timeout_ms: Option<u64>,
     write_timeout_ms: Option<u64>,
@@ -64,7 +66,7 @@ impl Default for ConfigBuilder {
             async_buffer_size: None,
             buffer_size: None,
             buffer_duration: None,
-            additional_fields: BTreeMap::default(),
+            additional_fields: Map::default(),
             full_buffer_policy: Some(FullBufferPolicy::Discard),
             connect_timeout_ms: None,
             write_timeout_ms: None,
@@ -83,6 +85,7 @@ impl ConfigBuilder {
     ///     .expect("Invalid config file!")
     ///     .build();
     /// ```
+    #[cfg(feature = "yaml")]
     pub fn try_from_yaml(path: &str) -> Result<ConfigBuilder> {
         Ok(serde_yaml::from_reader(File::open(path)?)?)
     }
@@ -146,13 +149,13 @@ impl ConfigBuilder {
         V: Into<Value>,
     {
         self.additional_fields
-            .insert(Value::String(key), value.into());
+            .insert(key, value.into());
         self
     }
     /// Adds multiple additional data which will be append to each log entry.
     pub fn extend_additional_fields(
         mut self,
-        additional_fields: BTreeMap<Value, Value>,
+        additional_fields: Map<String, Value>,
     ) -> ConfigBuilder {
         self.additional_fields.extend(additional_fields);
         self
@@ -226,7 +229,7 @@ pub struct Config {
     async_buffer_size: Option<usize>,
     buffer_size: Option<usize>,
     buffer_duration: Option<u64>,
-    additional_fields: BTreeMap<Value, Value>,
+    additional_fields: Map<String, Value>,
     full_buffer_policy: Option<FullBufferPolicy>,
     connect_timeout_ms: Option<u64>,
     write_timeout_ms: Option<u64>,
@@ -241,6 +244,7 @@ impl Config {
     ///
     /// let config = Config::try_from_yaml("/tmp/myconf.yml").unwrap();
     /// ```
+    #[cfg(feature = "yaml")]
     pub fn try_from_yaml(path: &str) -> Result<Config> {
         Ok(serde_yaml::from_reader(File::open(path)?)?)
     }
@@ -313,7 +317,7 @@ impl Config {
         &self.buffer_duration
     }
     /// Every additional data which will be append to each log entry.
-    pub fn additional_fields(&self) -> &BTreeMap<Value, Value> {
+    pub fn additional_fields(&self) -> &Map<String, Value> {
         &self.additional_fields
     }
     /// Get the full buffer policy

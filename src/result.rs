@@ -22,9 +22,10 @@ pub enum Error {
     LogError(log::SetLoggerError),
     /// Error on TLS initialization.
     TLSError(native_tls::HandshakeError<std::net::TcpStream>),
-    /// Invalid value
-    ValueSerializerError(serde_value::SerializerError),
+    // /// Invalid value
+    // ValueSerializerError(serde_json::Error),
     /// Invalid yaml content
+    #[cfg(feature = "yaml")]
     YamlError(serde_yaml::Error),
 }
 
@@ -42,6 +43,7 @@ impl From<log::SetLoggerError> for Error {
     }
 }
 
+#[cfg(feature = "yaml")]
 impl From<serde_yaml::Error> for Error {
     fn from(err: serde_yaml::Error) -> Error {
         Error::YamlError(err)
@@ -54,11 +56,11 @@ impl From<std::io::Error> for Error {
     }
 }
 
-impl From<serde_value::SerializerError> for Error {
-    fn from(err: serde_value::SerializerError) -> Error {
-        Error::ValueSerializerError(err)
-    }
-}
+// impl From<serde::ser::Error> for Error {
+//     fn from(err: serde_json::Error) -> Error {
+//         Error::ValueSerializerError(err)
+//     }
+// }
 
 impl From<serde_json::Error> for Error {
     fn from(err: serde_json::Error) -> Error {
@@ -89,7 +91,8 @@ impl fmt::Display for Error {
             Error::JsonSerializerError(err) => err.fmt(f),
             Error::LogError(err) => err.fmt(f),
             Error::TLSError(err) => err.fmt(f),
-            Error::ValueSerializerError(err) => err.fmt(f),
+            // Error::ValueSerializerError(err) => err.fmt(f),
+            #[cfg(feature = "yaml")]
             Error::YamlError(err) => err.fmt(f),
             Error::FullChannelError(e) => {
                 write!(f, "Async channel buffer is full while sending {:?}", e)

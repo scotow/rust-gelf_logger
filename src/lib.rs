@@ -73,18 +73,10 @@
     html_favicon_url = "https://www.ovh.com/favicon.ico"
 )]
 #![deny(warnings, missing_docs)]
-extern crate log;
-extern crate native_tls;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-extern crate serde_gelf;
-extern crate serde_json;
-extern crate serde_value;
-extern crate serde_value_utils;
-extern crate serde_yaml;
 
-pub use batch::{flush, init, init_from_file, init_processor, processor, Batch, BatchProcessor};
+pub use batch::{flush, init, init_processor, processor, Batch, BatchProcessor};
+#[cfg(feature = "yaml")]
+pub use batch::init_from_yaml_file;
 pub use buffer::Buffer;
 pub use config::{Config, ConfigBuilder};
 pub use output::GelfTcpOutput;

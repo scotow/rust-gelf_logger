@@ -1,8 +1,8 @@
 [package]
 name = "gelf_logger"
-version = "0.1.4"
+version = "0.2.0"
 authors = ["OVH SAS <github@ovh.net>"]
-license = "BSD-3-Clause"
+edition = "2021"
 license-file = "LICENSE"
 description = "Minimal rust logger to send log entries in GELF."
 keywords = ["serde", "logs", "GELF"]
@@ -11,14 +11,12 @@ repository = "https://github.com/ovh/rust-gelf_logger"
 
 [features]
 ovh-ldp = ["serde_gelf/ovh-ldp"]
+yaml = ["serde_yaml"]
 
 [dependencies]
 log = { version = "0.4", features = ["std"] }
 native-tls = "0.2"
-serde = "1.0"
-serde-value = "0.6"
-serde-value-utils  = "0.1"
-serde_derive = "1.0"
+serde = { version = "1.0", features = ["derive"] }
 serde_gelf = "0.1"
 serde_json = "1.0"
-serde_yaml = "0.8"
+serde_yaml = { version = "0.8", optional = true }
